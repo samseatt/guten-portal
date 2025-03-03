@@ -189,7 +189,7 @@ export default function ContentPage({ params }: { params: { site_name: string, s
         {/* Breadcrumbs (Compressed into Sidebar) */}
         <Breadcrumbs sx={{ mb: 2, fontSize: '0.9rem' }}>
           {/* <MuiLink href="/" color="inherit">{site.title}</MuiLink> */}
-          <MuiLink href={`/content/${section.name}`} color="inherit">{section.title}</MuiLink>
+          <MuiLink href={`/draft/${site.name}/${section.name}`} color="inherit">{section.title}</MuiLink>
           <Typography color="textPrimary">{page.title}</Typography>
         </Breadcrumbs>
 
@@ -223,7 +223,7 @@ export default function ContentPage({ params }: { params: { site_name: string, s
             {sections.map((sec) => (
               <MuiLink
                 key={sec.id}
-                href={`/content/${sec.name}`}
+                href={`/draft/${sec.name}`}
                 color="inherit"
                 underline="none"
                 sx={{

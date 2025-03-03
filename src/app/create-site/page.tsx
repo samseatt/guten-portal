@@ -4,6 +4,7 @@ import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Container, TextField, Button, Typography, Box, Paper } from '@mui/material';
 import api from '@/lib/api';
+import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 
 export default function CreateSite() {
   const router = useRouter();
@@ -11,13 +12,14 @@ export default function CreateSite() {
   const [title, setTitle] = useState('');
   const [url, setUrl] = useState('');
   const [logo, setLogo] = useState('');
+  const [favicon, setFavicon] = useState('');
   const [error, setError] = useState('');
 
   const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
 
     try {
-      const response = await api.post('/sites', { name, title, url, logo });
+      const response = await api.post('/sites', { name, title, url, logo, favicon });
       console.log('Site created:', response.data);
       setError('');
       alert(`Site '${response.data.name}' created successfully!`);
@@ -30,6 +32,13 @@ export default function CreateSite() {
 
   return (
     <Container maxWidth="sm">
+      <Button
+        startIcon={<ArrowBackIcon />}
+        onClick={() => router.push("/dashboard")}
+        sx={{ mb: 2 }}
+        >
+        Back to Dashboard
+      </Button>
       <Paper elevation={3} sx={{ padding: 4, marginTop: 4 }}>
         <Typography variant="h5" component="h1" gutterBottom>
           Create New Site
@@ -68,6 +77,14 @@ export default function CreateSite() {
             margin="normal"
             value={logo}
             onChange={(e) => setLogo(e.target.value)}
+          />
+
+          <TextField
+            label="Favicon URL"
+            fullWidth
+            margin="normal"
+            value={favicon}
+            onChange={(e) => setFavicon(e.target.value)}
           />
 
           {error && (

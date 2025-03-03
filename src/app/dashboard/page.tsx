@@ -11,6 +11,9 @@ interface Site {
   id: number;
   name: string;
   title: string;
+  url: string;
+  logo: string;
+  favicon: string;
 }
 
 export default function DashboardPage() {

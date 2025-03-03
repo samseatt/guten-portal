@@ -6,10 +6,17 @@ import { Box, Typography, TextField, Button, List, ListItem, ListItemText, IconB
 import DeleteIcon from "@mui/icons-material/Delete";
 import EditIcon from "@mui/icons-material/Edit";
 
+// interface Ref {
+//   id: number;
+//   url: string;
+//   description: string;
+// }
+
 export default function RefList({ site_name, section_name, page_name }) {
   const [refs, setRefs] = useState([]);
   const [newRef, setNewRef] = useState({ description: "", url: "" });
   const [editing, setEditing] = useState(null);
+  // const [editing, setEditing] = useState<Ref | null>(null);
 
   useEffect(() => {
     async function fetchRefs() {
@@ -25,7 +32,8 @@ export default function RefList({ site_name, section_name, page_name }) {
 
   const handleAddOrUpdate = async () => {
     if (editing) {
-      await axios.put(`/guten/refs/${editing.id}`, { ...newRef, site_name, section_name, page_name });
+      alert(editing.description);
+      await axios.put(`/guten/refs/${editing.id}`, { ...editing, site_name, section_name, page_name });
       setEditing(null);
     } else {
       await axios.post("/guten/refs", { ...newRef, site_name, section_name, page_name });
@@ -57,8 +65,22 @@ export default function RefList({ site_name, section_name, page_name }) {
       </List>
 
       {/* Form for adding or editing reference */}
-      <TextField fullWidth label="Description" value={newRef.description} onChange={(e) => setNewRef({ ...newRef, description: e.target.value })} sx={{ mt: 2 }} />
-      <TextField fullWidth label="URL" value={newRef.url} onChange={(e) => setNewRef({ ...newRef, url: e.target.value })} sx={{ mt: 2 }} />
+      <TextField
+        fullWidth
+        label="Description"
+        value={editing ? editing.description : newRef.description}
+        // onChange={(e) => setNewRef({ ...newRef, description: e.target.value })}
+        onChange={(e) => editing ? setEditing({ ...editing, description: e.target.value }) : setNewRef({ ...newRef, description: e.target.value })}
+        sx={{ mt: 2 }}
+      />
+      <TextField
+        fullWidth
+        label="URL"
+        value={editing ? editing.url : newRef.url}
+        // onChange={(e) => setNewRef({ ...newRef, url: e.target.value })}
+        onChange={(e) => editing ? setEditing({ ...editing, url: e.target.value }) : setNewRef({ ...newRef, url: e.target.value })}
+        sx={{ mt: 2 }}
+      />
       <Button variant="contained" sx={{ mt: 2 }} onClick={handleAddOrUpdate}>
         {editing ? "Update Reference" : "Add Reference"}
       </Button>

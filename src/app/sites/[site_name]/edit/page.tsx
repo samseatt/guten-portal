@@ -9,11 +9,17 @@ export default function EditSitePage() {
   const router = useRouter();
   const { site_name } = useParams<{ site_name: string }>();
   const [title, setTitle] = useState('');
+  const [url, setUrl] = useState('');
+  const [logo, setLogo] = useState('');
+  const [favicon, setFavicon] = useState('');
 
   useEffect(() => {
     const fetchSite = async () => {
       const { data } = await api.get(`/sites/${site_name}`);
       setTitle(data.title);
+      setUrl(data.url);
+      setLogo(data.logo);
+      setFavicon(data.favicon);
     };
     fetchSite();
   }, [site_name]);
@@ -21,7 +27,7 @@ export default function EditSitePage() {
   const handleUpdate = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     try {
-      await api.put(`/sites/${site_name}`, { title });
+      await api.put(`/sites/${site_name}`, { title, url, logo, favicon });
       router.push('/dashboard');
     } catch (error) {
       console.error('Update failed:', error);
@@ -43,6 +49,30 @@ export default function EditSitePage() {
           label="Site Title"
           value={title}
           onChange={(e) => setTitle(e.target.value)}
+          fullWidth
+          required
+          margin="normal"
+        />
+        <TextField
+          label="Site URL"
+          value={url}
+          onChange={(e) => setUrl(e.target.value)}
+          fullWidth
+          required
+          margin="normal"
+        />
+        <TextField
+          label="Site Logo"
+          value={logo}
+          onChange={(e) => setLogo(e.target.value)}
+          fullWidth
+          required
+          margin="normal"
+        />
+        <TextField
+          label="Site Favicon"
+          value={favicon}
+          onChange={(e) => setFavicon(e.target.value)}
           fullWidth
           required
           margin="normal"

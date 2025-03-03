@@ -10,7 +10,7 @@ export default function PageForm({ site_name, section_name }) {
     name: "",
     title: "",
     template: "default",
-    image: "",
+    primary_image: "",
     abstract: "",
     content: "",
   });
@@ -43,7 +43,7 @@ export default function PageForm({ site_name, section_name }) {
           <MenuItem value="default">Default</MenuItem>
           <MenuItem value="minimal">Minimal</MenuItem>
         </Select>
-        <TextField fullWidth name="image" label="Image URL" onChange={handleChange} sx={{ mt: 2 }} />
+        <TextField fullWidth name="primary_image" label="Image URL" onChange={handleChange} sx={{ mt: 2 }} />
         <TextField fullWidth multiline rows={2} name="abstract" label="Abstract" onChange={handleChange} sx={{ mt: 2 }} />
         <MarkdownEditor content={pageData.content} setContent={(content) => setPageData({ ...pageData, content })} />
         <Button type="submit" variant="contained" sx={{ mt: 3 }}>Save Page</Button>
