@@ -7,6 +7,7 @@ import { Box, Typography, TextField, Button } from "@mui/material";
 import RefList from "@/components/RefList";
 import NoteList from "@/components/NoteList";
 import ReactMarkdown from "react-markdown";
+import remarkGfm from 'remark-gfm'; // Import GitHub Flavored Markdown
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 
 export default function EditPage() {
@@ -57,7 +58,7 @@ export default function EditPage() {
 
       <Typography variant="body1" sx={{ mt: 2 }}>Preview:</Typography>
       <Box sx={{ border: "1px solid #ddd", p: 2, mt: 1, bgcolor: "#f9f9f9" }}>
-        <ReactMarkdown>{updatedPage.content}</ReactMarkdown>
+        <ReactMarkdown remarkPlugins={[remarkGfm]}>{updatedPage.content}</ReactMarkdown>
       </Box>
 
       <Button variant="contained" sx={{ mt: 2 }} onClick={handleUpdate}>

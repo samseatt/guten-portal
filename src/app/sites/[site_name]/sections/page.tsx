@@ -11,13 +11,14 @@ import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 interface Section {
   id: number;
   name: string;
+  label: string;
   title: string;
 }
 
 export default function SectionsPage() {
   const { site_name } = useParams();
   const [sections, setSections] = useState<Section[]>([]);
-  const [newSection, setNewSection] = useState({ name: "", title: "" });
+  const [newSection, setNewSection] = useState({ name: "", label: "", title: "" });
   const [editingSection, setEditingSection] = useState<Section | null>(null);
   const router = useRouter();
 
@@ -31,7 +32,7 @@ export default function SectionsPage() {
     axios.post("/guten/sections", { ...newSection, site_name })
       .then(res => {
         setSections([...sections, res.data]);
-        setNewSection({ name: "", title: "" });
+        setNewSection({ name: "", label: "", title: "" });
       })
       .catch(err => console.error("Error adding section", err));
   };
@@ -91,6 +92,14 @@ export default function SectionsPage() {
         sx={{ mb: 2 }}
         value={editingSection ? editingSection.name : newSection.name}
         onChange={(e) => editingSection ? setEditingSection({ ...editingSection, name: e.target.value }) : setNewSection({ ...newSection, name: e.target.value })}
+      />
+      <TextField
+        label="Section Label"
+        variant="outlined"
+        fullWidth
+        sx={{ mb: 2 }}
+        value={editingSection ? editingSection.label : newSection.label}
+        onChange={(e) => editingSection ? setEditingSection({ ...editingSection, label: e.target.value }) : setNewSection({ ...newSection, label: e.target.value })}
       />
       <TextField
         label="Section Title"

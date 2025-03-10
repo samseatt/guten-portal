@@ -14,6 +14,8 @@ interface Site {
   url: string;
   logo: string;
   favicon: string;
+  color: string;
+  landing_page_id: number;
 }
 
 export default function DashboardPage() {

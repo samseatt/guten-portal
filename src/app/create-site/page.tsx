@@ -13,13 +13,14 @@ export default function CreateSite() {
   const [url, setUrl] = useState('');
   const [logo, setLogo] = useState('');
   const [favicon, setFavicon] = useState('');
+  const [color, setColor] = useState('');
   const [error, setError] = useState('');
 
   const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
 
     try {
-      const response = await api.post('/sites', { name, title, url, logo, favicon });
+      const response = await api.post('/sites', { name, title, url, logo, favicon, color });
       console.log('Site created:', response.data);
       setError('');
       alert(`Site '${response.data.name}' created successfully!`);
@@ -85,6 +86,14 @@ export default function CreateSite() {
             margin="normal"
             value={favicon}
             onChange={(e) => setFavicon(e.target.value)}
+          />
+
+          <TextField
+            label="Color"
+            fullWidth
+            margin="normal"
+            value={color}
+            onChange={(e) => setColor(e.target.value)}
           />
 
           {error && (
