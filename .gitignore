@@ -40,9 +40,11 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 
-# temporary images
+# Site content media: backed up separately; keep local copies for serving
 public/assets/
 
 # wip
 docs-wip/
 
+# Local artifacts and safe configuration examples
+!.env.example
