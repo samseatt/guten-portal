@@ -1,6 +1,6 @@
 # Guten Portal
 
-Next.js/React/MUI authoring application for Guten sites, sections, pages, references, and notes. The current local MVP edits draft data through Guten Crust. Authentication remains unfinished. Per-site publication is available on the dashboard. References and notes can be managed in the page editor; they are not yet rendered in View Draft or Sites. Guten Sites displays the last published copy.
+Next.js/React/MUI authoring application for Guten sites, sections, pages, references, and notes. The current local MVP edits draft data through Guten Crust. Docker Portal uses allowlisted GitHub login; native development remains local and unauthenticated. See [authentication setup](../guten/docs/authentication.md). Per-site publication is available on the dashboard. References and notes can be managed in the page editor; they are not yet rendered in View Draft or Sites. Guten Sites displays the last published copy.
 
 ## Local development
 
@@ -15,7 +15,7 @@ make check SERVICE=portal
 
 Portal uses port **3001**. The existing Node dependencies must be installed first. Use the check and build commands to validate changes before deployment.
 
-Both HTTP clients share `NEXT_PUBLIC_API_BASE_URL` (default `http://localhost:8000/api`). The older `NEXT_PUBLIC_GUTEN_CRUST_URL` remains a fallback for compatibility; prefer the canonical setting in `.env.example`. Public settings are embedded during Next.js builds and must never contain secrets. Local `.env` files stay outside Git. `/health` is a process liveness endpoint. The unused token interceptor has been removed; authentication remains a separate deployment task.
+Both HTTP clients share `NEXT_PUBLIC_API_BASE_URL` (default `http://localhost:8000/api`). The older `NEXT_PUBLIC_GUTEN_CRUST_URL` remains a fallback for compatibility; prefer the canonical setting in `.env.example`. Public settings are embedded during Next.js builds and must never contain secrets. Local `.env` files stay outside Git. `/health` is a process liveness endpoint. Docker authentication is enforced by the gateway for both pages and editing APIs. `NEXT_PUBLIC_AUTH_ENABLED=true` enables the Sign out link at build time; it does not itself enforce access control.
 
 ## Content and files
 
