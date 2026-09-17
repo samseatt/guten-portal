@@ -43,3 +43,5 @@ Cross-service browser acceptance tests live in the coordination repository: [tes
 ## Containers
 
 The Dockerfile and .dockerignore package this service without local secrets, dumps, installed dependencies or content media. Build/start it using the sibling coordination repository’s [Docker Compose guide](../guten/docs/docker.md). The container rehearsal uses a separate empty database and alternate localhost ports.
+
+See [root pages and planned domain routing](../guten/docs/domain-routing.md) for the Portal home and public site entry points.

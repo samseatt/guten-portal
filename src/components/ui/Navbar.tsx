@@ -16,7 +16,7 @@ export default function Navbar() {
             href="/"
             sx={{ mr: 2, textDecoration: 'none', color: 'inherit' }}
           >
-            Guten Ink
+            Guten Portal
           </Typography>
         </Toolbar>
       </Container>
