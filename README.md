@@ -1,6 +1,6 @@
 # Guten Portal
 
-Next.js/React/MUI authoring application for Guten sites, sections, pages, references, and notes. The current local MVP edits draft data through Guten Crust. Authentication, reliable publication, and parts of refs/notes remain unfinished. Public Guten Sites currently reads the same draft content directly.
+Next.js/React/MUI authoring application for Guten sites, sections, pages, references, and notes. The current local MVP edits draft data through Guten Crust. Authentication and reliable publication remain unfinished. References and notes can be managed in the page editor; they are not yet rendered in View Draft or Sites. Public Guten Sites currently reads the same draft content directly.
 
 ## Local development
 
@@ -33,3 +33,5 @@ src/components/ — editor controls and landing redirect
 src/lib/ — clients, content types, theme
 public/assets/ — ignored content media
 ```
+
+References and notes support add, edit/cancel, and confirmed deletion below the page editor. Changes save without reloading the page. See the [editorial API contract](../guten-datalake/docs/editorial-refs-and-notes.md).

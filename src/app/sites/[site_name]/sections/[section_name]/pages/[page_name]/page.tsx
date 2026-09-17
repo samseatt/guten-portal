@@ -3,7 +3,8 @@
 import React, { useState, useEffect } from "react";
 import axios from "@/lib/axios";
 import { useParams, useRouter } from "next/navigation";
-import { Box, Typography, TextField, Button } from "@mui/material";
+import { Box, Typography, TextField, Button, Alert } from "@mui/material";
+import { errorMessage } from "@/lib/content";
 import RefList from "@/components/RefList";
 import NoteList from "@/components/NoteList";
 import ReactMarkdown from "react-markdown";
@@ -12,7 +13,10 @@ import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 
 export default function EditPage() {
   const { site_name, section_name, page_name } = useParams<{ site_name: string; section_name: string; page_name: string }>();
-  const [page, setPage] = useState(null);
+  const [page, setPage] = useState(false);
+  const [error, setError] = useState("");
+  const [notice, setNotice] = useState("");
+  const [saving, setSaving] = useState(false);
   const [updatedPage, setUpdatedPage] = useState({
     title: "",
     primary_image: "",
@@ -22,22 +26,32 @@ export default function EditPage() {
   const router = useRouter();
 
   useEffect(() => {
+    const controller = new AbortController();
+    setPage(false); setError(""); setNotice("");
     async function fetchPage() {
       try {
-        const response = await axios.get(`/guten/pages/${page_name}?site=${site_name}&section=${section_name}`);
-        setPage(response.data);
-        setUpdatedPage(response.data);
+        const response = await axios.get(`/guten/pages/${encodeURIComponent(page_name)}`, {
+          params: { site: site_name, section: section_name }, signal: controller.signal, timeout: 15000,
+        });
+        if (controller.signal.aborted) return;
+        setPage(true);
+        const data = response.data;
+        setUpdatedPage({ title: data.title, primary_image: data.primary_image || "", abstract: data.abstract || "", content: data.content || "" });
       } catch (error) {
-        console.error("Error fetching page:", error);
+        if (!controller.signal.aborted) setError(errorMessage(error));
       }
     }
-    fetchPage();
+    void fetchPage();
+    return () => controller.abort();
   }, [site_name, section_name, page_name]);
 
   const handleUpdate = async () => {
-    await axios.put(`/guten/pages/${page_name}`, { ...updatedPage, site_name, section_name });
-    alert(`Page '${site_name}' updated successfully!`);
-    window.location.reload();
+    setSaving(true); setError(""); setNotice("");
+    try {
+      await axios.put(`/guten/pages/${encodeURIComponent(page_name)}`, { ...updatedPage, name: page_name, site_name, section_name }, { timeout: 15000 });
+      setNotice("Page saved.");
+    } catch (error) { setError(errorMessage(error)); }
+    finally { setSaving(false); }
   };
 
   return (
@@ -50,18 +64,20 @@ export default function EditPage() {
         Back to Pages List
     </Button>
       <Typography variant="h6">Edit Page: {page_name}</Typography>
+      {error && <Alert severity="error">{error}</Alert>}
+      {notice && <Alert severity="success">{notice}</Alert>}
 
-      <TextField fullWidth label="Title" value={updatedPage.title} onChange={(e) => setUpdatedPage({ ...updatedPage, title: e.target.value })} sx={{ mt: 2 }} />
-      <TextField fullWidth label="Image URL" value={updatedPage.primary_image} onChange={(e) => setUpdatedPage({ ...updatedPage, primary_image: e.target.value })} sx={{ mt: 2 }} />
-      <TextField fullWidth multiline rows={2} label="Abstract" value={updatedPage.abstract} onChange={(e) => setUpdatedPage({ ...updatedPage, abstract: e.target.value })} sx={{ mt: 2 }} />
-      <TextField fullWidth multiline rows={6} label="Content (Markdown)" value={updatedPage.content} onChange={(e) => setUpdatedPage({ ...updatedPage, content: e.target.value })} sx={{ mt: 2 }} />
+      <TextField disabled={!page || saving} fullWidth label="Title" value={updatedPage.title} onChange={(e) => setUpdatedPage({ ...updatedPage, title: e.target.value })} sx={{ mt: 2 }} />
+      <TextField disabled={!page || saving} fullWidth label="Image URL" value={updatedPage.primary_image} onChange={(e) => setUpdatedPage({ ...updatedPage, primary_image: e.target.value })} sx={{ mt: 2 }} />
+      <TextField disabled={!page || saving} fullWidth multiline rows={2} label="Abstract" value={updatedPage.abstract} onChange={(e) => setUpdatedPage({ ...updatedPage, abstract: e.target.value })} sx={{ mt: 2 }} />
+      <TextField disabled={!page || saving} fullWidth multiline rows={6} label="Content (Markdown)" value={updatedPage.content} onChange={(e) => setUpdatedPage({ ...updatedPage, content: e.target.value })} sx={{ mt: 2 }} />
 
       <Typography variant="body1" sx={{ mt: 2 }}>Preview:</Typography>
       <Box sx={{ border: "1px solid #ddd", p: 2, mt: 1, bgcolor: "#f9f9f9" }}>
         <ReactMarkdown remarkPlugins={[remarkGfm]}>{updatedPage.content}</ReactMarkdown>
       </Box>
 
-      <Button variant="contained" sx={{ mt: 2 }} onClick={handleUpdate}>
+      <Button variant="contained" sx={{ mt: 2 }} disabled={!page || saving} onClick={handleUpdate}>
         Save Changes
       </Button>
 
