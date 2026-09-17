@@ -39,3 +39,7 @@ References and notes support add, edit/cancel, and confirmed deletion below the 
 See [per-site publishing](../guten-datalake/docs/publishing.md) for the editor workflow, API, migration, and initial publication seeding. Portal/View Draft reads draft; Guten Sites reads published content only.
 
 Cross-service browser acceptance tests live in the coordination repository: [testing guide](../guten/docs/testing.md).
+
+## Containers
+
+The Dockerfile and .dockerignore package this service without local secrets, dumps, installed dependencies or content media. Build/start it using the sibling coordination repository’s [Docker Compose guide](../guten/docs/docker.md). The container rehearsal uses a separate empty database and alternate localhost ports.
