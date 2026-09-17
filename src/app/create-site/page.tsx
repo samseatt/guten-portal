@@ -4,6 +4,7 @@ import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Container, TextField, Button, Typography, Box, Paper } from '@mui/material';
 import api from '@/lib/api';
+import { errorMessage } from '@/lib/content';
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 
 export default function CreateSite() {
@@ -25,9 +26,9 @@ export default function CreateSite() {
       setError('');
       alert(`Site '${response.data.name}' created successfully!`);
       router.push(`/sites/${name}/sections`);
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error('Error creating site:', err);
-      setError(err.response?.data?.message || 'Failed to create site');
+      setError(errorMessage(err));
     }
   };
 

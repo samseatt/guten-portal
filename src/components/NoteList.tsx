@@ -7,10 +7,11 @@ import ReactMarkdown from "react-markdown";
 import DeleteIcon from "@mui/icons-material/Delete";
 import EditIcon from "@mui/icons-material/Edit";
 
-export default function NoteList({ site_name, section_name, page_name }) {
-  const [notes, setNotes] = useState([]);
+interface Note { id: number; note: string; }
+export default function NoteList({ site_name, section_name, page_name }: { site_name: string; section_name: string; page_name: string }) {
+  const [notes, setNotes] = useState<Note[]>([]);
   const [newNote, setNewNote] = useState("");
-  const [editing, setEditing] = useState(null);
+  const [editing, setEditing] = useState<Note | null>(null);
 
   useEffect(() => {
     async function fetchNotes() {
@@ -35,7 +36,7 @@ export default function NoteList({ site_name, section_name, page_name }) {
     window.location.reload();
   };
 
-  const handleDelete = async (id) => {
+  const handleDelete = async (id: number) => {
     await axios.delete(`/guten/notes/${id}`);
     window.location.reload();
   };

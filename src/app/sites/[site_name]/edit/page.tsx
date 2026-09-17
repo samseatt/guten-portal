@@ -28,7 +28,7 @@ export default function EditSitePage() {
   const [landingPageId, setLandingPageId] = useState<number | null>(null);
   const [error, setError] = useState("");
 
-  const [pages, setPages] = useState<{ id: number; name: string }[]>([]);
+  const [pages, setPages] = useState<{ id: number; name: string; section_name: string | null }[]>([]);
 
   useEffect(() => {
     const fetchSite = async () => {
@@ -140,13 +140,13 @@ export default function EditSitePage() {
           {/* <InputLabel>Landing Page</InputLabel> */}
           <Select
             value={landingPageId ?? ""}
-            onChange={(e) => setLandingPageId(e.target.value as number)}
+            onChange={(e) => setLandingPageId(e.target.value === "" ? null : Number(e.target.value))}
             displayEmpty
           >
             <MenuItem value="">None (Auto-routed)</MenuItem>
             {pages.map((page) => (
               <MenuItem key={page.id} value={page.id}>
-                {page.name}
+                {page.section_name ? `${page.section_name} / ${page.name}` : page.name}
               </MenuItem>
             ))}
           </Select>

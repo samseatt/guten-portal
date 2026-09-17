@@ -12,10 +12,11 @@ import EditIcon from "@mui/icons-material/Edit";
 //   description: string;
 // }
 
-export default function RefList({ site_name, section_name, page_name }) {
-  const [refs, setRefs] = useState([]);
+interface Ref { id: number; description: string; url: string; }
+export default function RefList({ site_name, section_name, page_name }: { site_name: string; section_name: string; page_name: string }) {
+  const [refs, setRefs] = useState<Ref[]>([]);
   const [newRef, setNewRef] = useState({ description: "", url: "" });
-  const [editing, setEditing] = useState(null);
+  const [editing, setEditing] = useState<Ref | null>(null);
   // const [editing, setEditing] = useState<Ref | null>(null);
 
   useEffect(() => {
@@ -42,7 +43,7 @@ export default function RefList({ site_name, section_name, page_name }) {
     window.location.reload();
   };
 
-  const handleDelete = async (id) => {
+  const handleDelete = async (id: number) => {
     await axios.delete(`/guten/refs/${id}`);
     window.location.reload();
   };

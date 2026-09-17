@@ -1,117 +1,79 @@
 "use client";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
-import axios from "@/lib/axios";
-import { Container, Typography, Button, TextField, List, ListItem, ListItemText, IconButton } from "@mui/material";
+import api from "@/lib/api";
+import { Section, errorMessage } from "@/lib/content";
+import OrderButtons from "@/components/OrderButtons";
+import { Alert, Container, Typography, Button, TextField, List, ListItem, ListItemText, IconButton, Box } from "@mui/material";
 import DeleteIcon from "@mui/icons-material/Delete";
 import EditIcon from "@mui/icons-material/Edit";
 import ListAltIcon from "@mui/icons-material/ListAlt";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 
-interface Section {
-  id: number;
-  name: string;
-  label: string;
-  title: string;
-}
-
+const empty = { name: "", label: "", title: "" };
 export default function SectionsPage() {
-  const { site_name } = useParams();
-  const [sections, setSections] = useState<Section[]>([]);
-  const [newSection, setNewSection] = useState({ name: "", label: "", title: "" });
-  const [editingSection, setEditingSection] = useState<Section | null>(null);
+  const { site_name } = useParams<{ site_name: string }>();
   const router = useRouter();
-
-  useEffect(() => {
-    axios.get(`/guten/sections?site=${site_name}`)
-      .then(res => setSections(res.data))
-      .catch(err => console.error("Error fetching sections", err));
+  const [sections, setSections] = useState<Section[]>([]);
+  const [form, setForm] = useState(empty);
+  const [editing, setEditing] = useState<number | null>(null);
+  const [busy, setBusy] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+  const [notice, setNotice] = useState("");
+  const load = useCallback(async () => {
+    const { data } = await api.get<Section[]>("/sections", { params: { site: site_name } });
+    setSections(data);
   }, [site_name]);
-
-  const handleCreate = () => {
-    axios.post("/guten/sections", { ...newSection, site_name })
-      .then(res => {
-        setSections([...sections, res.data]);
-        setNewSection({ name: "", label: "", title: "" });
-      })
-      .catch(err => console.error("Error adding section", err));
-  };
-
-  const handleUpdate = () => {
-    if (!editingSection) return;
-    axios.put(`/guten/sections/${editingSection.id}`, editingSection)
-      .then(res => {
-        setSections(sections.map(sec => (sec.id === res.data.id ? res.data : sec)));
-        setEditingSection(null);
-      })
-      .catch(err => console.error("Error updating section", err));
-  };
-
-  const handleDelete = (id: number) => {
-    axios.delete(`/guten/sections/${id}`)
-      .then(() => setSections(sections.filter(sec => sec.id !== id)))
-      .catch(err => console.error("Error deleting section", err));
-  };
-
-  return (
-    <Container maxWidth="md" >
-      <Button
-        startIcon={<ArrowBackIcon />}
-        onClick={() => router.push("/dashboard")}
-        sx={{ mb: 2 }}
-        >
-        Back to Dashboard
-      </Button>
-      <Typography variant="h4" sx={{ mt: 3, mb: 2 }}>Manage Sections for {site_name}</Typography>
-
-      <List>
-        {sections.map(section => (
-          <ListItem key={section.id} secondaryAction={
-            <>
-              <IconButton onClick={() => router.push(`/sites/${site_name}/sections/${section.name}/pages`)}>
-                <ListAltIcon />
-              </IconButton>
-              <IconButton edge="end" aria-label="edit" onClick={() => setEditingSection(section)}>
-                <EditIcon />
-              </IconButton>
-              <IconButton edge="end" aria-label="delete" onClick={() => handleDelete(section.id)}>
-                <DeleteIcon />
-              </IconButton>
-            </>
-          }>
-            <ListItemText primary={section.title} secondary={section.name} />
-          </ListItem>
-        ))}
-      </List>
-
-      <Typography variant="h6" sx={{ mt: 4 }}>Add / Edit Section</Typography>
-      <TextField
-        label="Section Name"
-        variant="outlined"
-        fullWidth
-        sx={{ mb: 2 }}
-        value={editingSection ? editingSection.name : newSection.name}
-        onChange={(e) => editingSection ? setEditingSection({ ...editingSection, name: e.target.value }) : setNewSection({ ...newSection, name: e.target.value })}
-      />
-      <TextField
-        label="Section Label"
-        variant="outlined"
-        fullWidth
-        sx={{ mb: 2 }}
-        value={editingSection ? editingSection.label : newSection.label}
-        onChange={(e) => editingSection ? setEditingSection({ ...editingSection, label: e.target.value }) : setNewSection({ ...newSection, label: e.target.value })}
-      />
-      <TextField
-        label="Section Title"
-        variant="outlined"
-        fullWidth
-        sx={{ mb: 2 }}
-        value={editingSection ? editingSection.title : newSection.title}
-        onChange={(e) => editingSection ? setEditingSection({ ...editingSection, title: e.target.value }) : setNewSection({ ...newSection, title: e.target.value })}
-      />
-      <Button variant="contained" onClick={editingSection ? handleUpdate : handleCreate}>
-        {editingSection ? "Update Section" : "Create Section"}
-      </Button>
-    </Container>
-  );
+  useEffect(() => {
+    setLoading(true);
+    load().catch(e => setError(errorMessage(e))).finally(() => setLoading(false));
+  }, [load]);
+  const disabled = loading || busy;
+  async function save(action: () => Promise<unknown>, message: string) {
+    setBusy(true); setError(""); setNotice("");
+    try {
+      await action(); await load(); setNotice(message); return true;
+    } catch (e) {
+      setError(errorMessage(e));
+      try { await load(); } catch { /* Keep the original action error visible. */ }
+      return false;
+    } finally { setBusy(false); }
+  }
+  async function move(index: number, direction: -1 | 1) {
+    const ids = sections.map(section => section.id);
+    const expected_ids = [...ids];
+    [ids[index], ids[index + direction]] = [ids[index + direction], ids[index]];
+    await save(() => api.put(`/sites/${encodeURIComponent(site_name)}/sections/order`, { ids, expected_ids }), "Section order saved.");
+  }
+  async function submit(event: React.FormEvent) {
+    event.preventDefault();
+    if (await save(() => editing === null ? api.post("/sections", { ...form, site_name }) : api.put(`/sections/${editing}`, form), "Section saved.")) {
+      setEditing(null); setForm(empty);
+    }
+  }
+  return <Container maxWidth="md" sx={{ py: 3 }}>
+    <Button startIcon={<ArrowBackIcon />} onClick={() => router.push("/dashboard")}>Back to Dashboard</Button>
+    <Typography variant="h4" sx={{ my: 2 }}>Manage Sections for {site_name}</Typography>
+    <Typography color="text.secondary">Use the arrows to set navigation order. Changes save immediately.</Typography>
+    {error && <Alert severity="error" sx={{ my: 2 }}>{error}</Alert>}
+    {notice && <Alert severity="success" sx={{ my: 2 }}>{notice}</Alert>}
+    {loading && <Typography role="status">Loading sections…</Typography>}
+    {!loading && !sections.length && <Typography sx={{ my: 2 }}>No sections yet.</Typography>}
+    <List>{sections.map((section, index) => <ListItem key={section.id} sx={{ flexWrap: "wrap", gap: 1 }}>
+      <ListItemText primary={`${index + 1}. ${section.title}`} secondary={section.name} />
+      <Box>
+        <OrderButtons label={section.title} index={index} count={sections.length} disabled={disabled} onMove={direction => { void move(index, direction); }} />
+        <IconButton aria-label={`Manage pages in ${section.title}`} disabled={disabled} onClick={() => router.push(`/sites/${encodeURIComponent(site_name)}/sections/${encodeURIComponent(section.name)}/pages`)}><ListAltIcon /></IconButton>
+        <IconButton aria-label={`Edit ${section.title}`} disabled={disabled} onClick={() => { setEditing(section.id); setForm({ name: section.name, label: section.label ?? "", title: section.title }); }}><EditIcon /></IconButton>
+        <IconButton aria-label={`Delete ${section.title}`} disabled={disabled} onClick={() => { if (window.confirm(`Delete ${section.title} and its pages?`)) void save(() => api.delete(`/sections/${section.id}`), "Section deleted.").then(ok => { if(ok && editing === section.id) { setEditing(null); setForm(empty); } }); }}><DeleteIcon /></IconButton>
+      </Box>
+    </ListItem>)}</List>
+    <Box component="form" onSubmit={submit} sx={{ mt: 3 }}>
+      <Typography variant="h6">{editing === null ? "Add Section" : "Edit Section"}</Typography>
+      {(["name", "label", "title"] as const).map(key => <TextField key={key} label={`Section ${key}`} fullWidth required={key !== "label"} disabled={disabled} margin="normal" value={form[key]} onChange={e => setForm({ ...form, [key]: e.target.value })} />)}
+      <Button type="submit" variant="contained" disabled={disabled}>{editing === null ? "Create Section" : "Update Section"}</Button>
+      {editing !== null && <Button disabled={disabled} onClick={() => { setEditing(null); setForm(empty); }}>Cancel</Button>}
+    </Box>
+  </Container>;
 }

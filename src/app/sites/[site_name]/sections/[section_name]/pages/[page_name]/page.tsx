@@ -11,7 +11,7 @@ import remarkGfm from 'remark-gfm'; // Import GitHub Flavored Markdown
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 
 export default function EditPage() {
-  const { site_name, section_name, page_name } = useParams();
+  const { site_name, section_name, page_name } = useParams<{ site_name: string; section_name: string; page_name: string }>();
   const [page, setPage] = useState(null);
   const [updatedPage, setUpdatedPage] = useState({
     title: "",

@@ -3,8 +3,6 @@ import React, { useEffect, useState } from 'react';
 import { Box, Grid, Typography, Container, Button } from '@mui/material';
 import Link from 'next/link';
 import DashboardCard from '@/components/ui/DashboardCard';
-import Navbar from '@/components/ui/Navbar';
-import Footer from '@/components/ui/Footer';
 import api from '@/lib/api';
 
 interface Site {

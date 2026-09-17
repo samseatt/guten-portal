@@ -1,53 +1,19 @@
 "use client";
-
-import React, { useState } from "react";
-import axios from "@/lib/axios";
-import { TextField, Button, Box, Typography, Select, MenuItem } from "@mui/material";
+import { useState } from "react";
+import { TextField, Button, Box, Typography } from "@mui/material";
+import { PageInput } from "@/lib/content";
 import MarkdownEditor from "./MarkdownEditor";
-
-export default function PageForm({ site_name, section_name }) {
-  const [pageData, setPageData] = useState({
-    name: "",
-    title: "",
-    template: "default",
-    primary_image: "",
-    abstract: "",
-    content: "",
-  });
-
-  const handleChange = (e) => {
-    setPageData({ ...pageData, [e.target.name]: e.target.value });
-  };
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    try {
-      await axios.post("/guten/pages", {
-        site_name,
-        section_name,
-        ...pageData,
-      });
-      alert("Page created successfully!");
-    } catch (error) {
-      console.error("Error creating page:", error);
-    }
-  };
-
-  return (
-    <Box sx={{ mt: 3 }}>
-      <Typography variant="h5">Create a New Page</Typography>
-      <form onSubmit={handleSubmit}>
-        <TextField fullWidth name="name" label="Page Name" onChange={handleChange} sx={{ mt: 2 }} />
-        <TextField fullWidth name="title" label="Title" onChange={handleChange} sx={{ mt: 2 }} />
-        <Select fullWidth name="template" value={pageData.template} onChange={handleChange} sx={{ mt: 2 }}>
-          <MenuItem value="default">Default</MenuItem>
-          <MenuItem value="minimal">Minimal</MenuItem>
-        </Select>
-        <TextField fullWidth name="primary_image" label="Image URL" onChange={handleChange} sx={{ mt: 2 }} />
-        <TextField fullWidth multiline rows={2} name="abstract" label="Abstract" onChange={handleChange} sx={{ mt: 2 }} />
-        <MarkdownEditor content={pageData.content} setContent={(content) => setPageData({ ...pageData, content })} />
-        <Button type="submit" variant="contained" sx={{ mt: 3 }}>Save Page</Button>
-      </form>
-    </Box>
-  );
+const empty: PageInput = { name: "", title: "", primary_image: "", abstract: "", content: "" };
+export default function PageForm({ disabled, onCreate }: { disabled: boolean; onCreate: (page: PageInput) => Promise<boolean> }) {
+  const [data, setData] = useState(empty);
+  async function submit(event: React.FormEvent) {
+    event.preventDefault();
+    if (await onCreate(data)) setData(empty);
+  }
+  return <Box component="form" onSubmit={submit} sx={{ mt: 3 }}>
+    <Typography variant="h5">Create a New Page</Typography>
+    {(["name", "title", "primary_image", "abstract"] as const).map(key => <TextField key={key} fullWidth disabled={disabled} required={key === "name" || key === "title"} label={key === "primary_image" ? "Image URL" : key} value={data[key]} onChange={event => setData({ ...data, [key]: event.target.value })} sx={{ mt: 2 }} />)}
+    <MarkdownEditor disabled={disabled} content={data.content} setContent={content => setData({ ...data, content })} />
+    <Button type="submit" disabled={disabled} variant="contained" sx={{ mt: 3 }}>Save Page</Button>
+  </Box>;
 }
