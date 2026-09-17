@@ -1,8 +1,4 @@
-// src/lib/api.ts
-import axios from 'axios';
+import axios from "axios";
+import { API_BASE_URL } from "./config";
 
-const api = axios.create({
-  baseURL: process.env.NEXT_PUBLIC_GUTEN_CRUST_URL || 'http://localhost:8000/api/guten',
-});
-
-export default api;
+export default axios.create({ baseURL: `${API_BASE_URL}/guten`, timeout: 15000 });
