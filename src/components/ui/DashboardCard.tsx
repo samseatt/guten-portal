@@ -18,7 +18,6 @@ export default function DashboardCard({ site, status, onStatus }: Props) {
   const [notice, setNotice] = useState('');
   const [confirmation, setConfirmation] = useState<{ action: 'publish' | 'unpublish'; status: PublicationStatus } | null>(null);
   const name = encodeURIComponent(site.name);
-  const sitesUrl = (process.env.NEXT_PUBLIC_GUTEN_SITES_URL || 'http://localhost:3000').replace(/\/$/, '');
 
   async function prepare(action: 'publish' | 'unpublish') {
     setBusy(true); setError(''); setNotice('');
@@ -62,7 +61,7 @@ export default function DashboardCard({ site, status, onStatus }: Props) {
         <Button component={Link} href={`/sites/${name}/edit`} size="small">Edit Site</Button>
         <Button component={Link} href={`/sites/${name}/sections`} size="small">Manage Sections</Button>
         <Button component={Link} href={`/draft/${name}`} size="small">View Draft</Button>
-        {status?.is_published && <Button component="a" href={`${sitesUrl}/${name}`} target="_blank" rel="noopener noreferrer" size="small">View Published</Button>}
+        {status?.is_published && <Button component="a" href={`/published/${name}`} target="_blank" rel="noopener noreferrer" size="small">View Published</Button>}
         <Button disabled={busy} size="small" onClick={() => void prepare('publish')}>Publish</Button>
         {status?.is_published && <Button disabled={busy} size="small" color="warning" onClick={() => void prepare('unpublish')}>Unpublish</Button>}
       </CardActions>
